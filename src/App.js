@@ -1,25 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { fetchMovies } from './api';
+import MovieList from './components/MovieList';
+import MovieDetails from './components/MovieDetails';
+import SearchAndPagination from './components/SearchAndpagination';
 
-function App() {
+const App = () => {
+  const [movies, setMovies] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [query, setQuery] = useState('');
+
+  useEffect(() => {
+    const getMovies = async () => {
+      const data = await fetchMovies(query, currentPage);
+      setMovies(data.results);
+    };
+    getMovies();
+  }, [query, currentPage]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="app">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <>
+                <SearchAndPagination
+                  onSearch={(term) => setQuery(term)}
+                  onPageChange={(page) => setCurrentPage(page)}
+                  currentPage={currentPage}
+                />
+                <MovieList movies={movies} />
+              </>
+            }
+          />
+          <Route path="/movie/:id" element={<MovieDetails />} />
+        </Routes>
+      </div>
+    </Router>
   );
-}
+};
 
 export default App;
